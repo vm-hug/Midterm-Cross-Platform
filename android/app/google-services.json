@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "744420211390",
+    "project_id": "giuaki-13b9b",
+    "storage_bucket": "giuaki-13b9b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744420211390:android:c3ab0fb281f2ec9059bcef",
+        "android_client_info": {
+          "package_name": "vn.edu.midterm.midterm_cross_platform"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "744420211390-a2ha6pi0e135pjk9cb5a536j3962kctn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcGcvof57gtbpHJ17sBSyGoFx9PQQaofU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "744420211390-a2ha6pi0e135pjk9cb5a536j3962kctn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "744420211390-5mrc9tqlislu3g3i851h3uu8bllhe8af.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "vn.edu.midterm.midtermCrossPlatform"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

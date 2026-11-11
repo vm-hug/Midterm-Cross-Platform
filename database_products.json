@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Asset game 1",
+    "price": 200,
+    "soluong": 3,
+    "image": "https://res.cloudinary.com/dqv9sna9b/image/upload/v1794380078/h6dylipkhqi3dcbpu7bj.png"
+  },
+  {
+    "name": "Asset BackGroud",
+    "price": 300,
+    "soluong": 5,
+    "image": "https://res.cloudinary.com/dqv9sna9b/image/upload/v1794380116/lhijzj27vxptpliqpm84.jpg"
+  }
+]
