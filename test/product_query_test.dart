@@ -3,11 +3,12 @@ import 'package:midterm_cross_platform/models/product_model.dart';
 import 'package:midterm_cross_platform/core/utils/product_query.dart';
 
 void main() {
-  test('Prices always show two decimals with a decimal comma', () {
-    expect(priceText(200.0), '200,00 ₫');
-    expect(priceText(12.5), '12,50 ₫');
-    expect(priceText(12.345), '12,35 ₫');
-    expect(priceText(0.0), '0,00 ₫');
+  test('Prices format with thousands separators', () {
+    expect(priceText(27000000.0), '27,000,000 ₫');
+    expect(priceText(12500.0), '12,500 ₫');
+    expect(priceText(200.0), '200 ₫');
+    expect(priceText(12.5), '12,5 ₫');
+    expect(priceText(0.0), '0 ₫');
   });
   const products = [
     ProductModel(

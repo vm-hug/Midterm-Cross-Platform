@@ -11,7 +11,10 @@ import '../core/utils/app_error.dart';
 import '../widgets/common.dart';
 import '../widgets/product_table.dart';
 import '../widgets/product_card.dart';
+import '../widgets/product_grid_card.dart';
 import 'product_form_screen.dart';
+
+enum ProductViewMode { list, grid }
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({
@@ -38,6 +41,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _exporting = false;
   bool _loggingOut = false;
   final _busyIds = <String>{};
+  ProductViewMode _viewMode = ProductViewMode.list;
+
   @override
   void dispose() {
     _search.dispose();
@@ -68,9 +73,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        icon: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: Colors.redAccent.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.delete_outline_rounded,
+            color: Colors.redAccent,
+            size: 26,
+          ),
+        ),
         title: const Text('Xóa sản phẩm?'),
         content: Text(
           'Bạn có chắc muốn xóa ${user.name}?\nẢnh cũ vẫn được giữ trong Cloudinary.',
+          style: const TextStyle(height: 1.5),
         ),
         actions: [
           TextButton(
@@ -78,7 +97,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: const Text('Hủy'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Xóa sản phẩm'),
           ),
@@ -124,52 +146,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _sidebar() => Container(
-    width: 228,
-    color: AppTheme.navy,
-    padding: const EdgeInsets.all(24),
+    width: 240,
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [AppTheme.purpleDark, AppTheme.purpleDeep],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        const Row(
+        const SizedBox(height: 12),
+        Row(
           children: [
-            Icon(Icons.hub_rounded, color: Color(0xff72dad0), size: 30),
-            SizedBox(width: 10),
-            Expanded(
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                gradient: AppTheme.brandGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.cyanBright.withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.hub_rounded,
+                color: AppTheme.purpleDark,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'UserSpace',
+                  'Product Manager',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 56),
-        const Text(
+        const SizedBox(height: 44),
+        Text(
           'KHÔNG GIAN QUẢN TRỊ',
           style: TextStyle(
-            color: Color(0xff9ab6bf),
+            color: AppTheme.purplePastel.withValues(alpha: 0.7),
             fontSize: 10,
-            letterSpacing: 1.4,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.6,
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xff284b56),
-            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.cyanBright.withValues(alpha: 0.2),
+                AppTheme.purplePastel.withValues(alpha: 0.25),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: AppTheme.cyanBright.withValues(alpha: 0.35),
+              width: 1.2,
+            ),
           ),
           child: const Row(
             children: [
-              Icon(Icons.inventory_2_outlined, color: Color(0xff8be1d8)),
+              Icon(
+                Icons.inventory_2_rounded,
+                color: AppTheme.cyanBright,
+                size: 20,
+              ),
               SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -177,40 +239,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                 ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppTheme.cyanBright,
+                size: 18,
               ),
             ],
           ),
         ),
         const Spacer(),
-        const Icon(Icons.devices_rounded, color: Color(0xff9ab6bf)),
-        const SizedBox(height: 12),
-        const Text(
-          'Một dữ liệu.\nBa nền tảng.',
-          style: TextStyle(color: Colors.white, fontSize: 18, height: 1.5),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.purplePastel.withValues(alpha: 0.25),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.cyanBright.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.devices_rounded,
+                  color: AppTheme.cyanBright,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Một dữ liệu.\nBa nền tảng.',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  height: 1.4,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Web · Android · iOS',
+                style: TextStyle(
+                  color: AppTheme.purplePastel.withValues(alpha: 0.8),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 10),
-        const Text(
-          'Web · Android · iOS',
-          style: TextStyle(color: Color(0xff9ab6bf), fontSize: 12),
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
       ],
     ),
   );
-  Widget _stat(String label, int value, IconData icon, Color color) => Card(
+
+  Widget _stat(String label, int value, IconData icon, Gradient iconBg, Color iconColor) => Card(
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+      side: const BorderSide(color: AppTheme.cardBorder, width: 1.2),
+    ),
     child: Padding(
       padding: const EdgeInsets.all(22),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            width: 58,
+            height: 58,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: .1),
-              borderRadius: BorderRadius.circular(14),
+              gradient: iconBg,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: iconColor.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: Icon(icon, color: color),
+            child: Icon(icon, color: iconColor, size: 26),
           ),
           const SizedBox(width: 18),
           Expanded(
@@ -220,12 +336,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   '$value',
                   style: const TextStyle(
-                    fontSize: 30,
+                    fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.navy,
+                    letterSpacing: -0.5,
                   ),
                 ),
-                Text(label, style: const TextStyle(color: Colors.blueGrey)),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
@@ -233,10 +358,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     ),
   );
+
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 1100;
     return Scaffold(
+      backgroundColor: AppTheme.scaffoldBg,
       body: SafeArea(
         child: Row(
           children: [
@@ -248,37 +375,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: Colors.white,
                     padding: EdgeInsets.symmetric(
                       horizontal: wide ? 36 : 20,
-                      vertical: 16,
+                      vertical: 14,
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.space_dashboard_outlined,
-                          color: AppTheme.teal,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.purplePastel.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.space_dashboard_rounded,
+                            color: AppTheme.purplePrimary,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
                             'Trang quản trị',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppTheme.navy,
+                            ),
                           ),
                         ),
                         if (wide)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 16),
-                            child: Text(
-                              widget.adminEmail,
-                              style: const TextStyle(color: Colors.blueGrey),
+                          Container(
+                            margin: const EdgeInsets.only(right: 14),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.scaffoldBg,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppTheme.purplePastel.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.account_circle_rounded,
+                                  size: 16,
+                                  color: AppTheme.purplePrimary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.adminEmail,
+                                  style: const TextStyle(
+                                    color: AppTheme.navy,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        IconButton(
-                          tooltip: 'Đăng xuất',
-                          onPressed: _loggingOut ? null : _logout,
-                          icon: const Icon(Icons.logout_rounded),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppTheme.scaffoldBg,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppTheme.cardBorder),
+                          ),
+                          child: IconButton(
+                            tooltip: 'Đăng xuất',
+                            onPressed: _loggingOut ? null : _logout,
+                            icon: const Icon(
+                              Icons.logout_rounded,
+                              size: 18,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  const Divider(color: AppTheme.cardBorder, height: 1),
                   Expanded(
                     child: StreamBuilder<List<ProductModel>>(
                       stream: _stream,
@@ -296,7 +472,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         }
                         if (!snapshot.hasData) {
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator(
+                              color: AppTheme.purplePrimary,
+                            ),
                           );
                         }
                         final all = snapshot.data!;
@@ -321,34 +499,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           ?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             color: AppTheme.navy,
+                                            letterSpacing: -0.5,
                                           ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 6),
                                     const Text(
                                       'Thông tin rõ ràng. Cập nhật theo thời gian thực.',
-                                      style: TextStyle(color: Colors.blueGrey),
+                                      style: TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ],
                                 ),
                                 Wrap(
-                                  spacing: 10,
+                                  spacing: 12,
                                   runSpacing: 10,
                                   children: [
                                     if (kIsWeb)
                                       OutlinedButton.icon(
                                         onPressed: _exporting ? null : _export,
                                         icon: const Icon(
-                                          Icons.file_download_outlined,
+                                          Icons.file_download_rounded,
+                                          size: 18,
                                         ),
                                         label: Text(
                                           _exporting
                                               ? 'Đang xuất…'
                                               : 'Xuất JSON',
                                         ),
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(
+                                            color: AppTheme.purplePastel
+                                                .withValues(alpha: 0.7),
+                                            width: 1.4,
+                                          ),
+                                          foregroundColor: AppTheme.purplePrimary,
+                                        ),
                                       ),
                                     FilledButton.icon(
                                       onPressed: () => _form(),
-                                      icon: const Icon(Icons.add_rounded),
+                                      icon: const Icon(
+                                        Icons.add_rounded,
+                                        size: 20,
+                                      ),
                                       label: const Text('Thêm sản phẩm'),
                                     ),
                                   ],
@@ -365,8 +559,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           child: _stat(
                                             'Tổng sản phẩm',
                                             all.length,
-                                            Icons.inventory_2_outlined,
-                                            AppTheme.teal,
+                                            Icons.inventory_2_rounded,
+                                            const LinearGradient(
+                                              colors: [
+                                                Color(0x4466ffff),
+                                                Color(0x3399ffff),
+                                              ],
+                                            ),
+                                            const Color(0xff0284c7),
                                           ),
                                         ),
                                         const SizedBox(width: 18),
@@ -377,8 +577,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               0,
                                               (sum, p) => sum + p.soluong,
                                             ),
-                                            Icons.numbers_rounded,
-                                            const Color(0xff6572bb),
+                                            Icons.layers_rounded,
+                                            const LinearGradient(
+                                              colors: [
+                                                Color(0x44cc99ff),
+                                                Color(0x22cc99ff),
+                                              ],
+                                            ),
+                                            AppTheme.purplePrimary,
                                           ),
                                         ),
                                       ],
@@ -388,38 +594,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         _stat(
                                           'Tổng sản phẩm',
                                           all.length,
-                                          Icons.inventory_2_outlined,
-                                          AppTheme.teal,
+                                          Icons.inventory_2_rounded,
+                                          const LinearGradient(
+                                            colors: [
+                                              Color(0x4466ffff),
+                                              Color(0x3399ffff),
+                                            ],
+                                          ),
+                                          const Color(0xff0284c7),
                                         ),
-                                        const SizedBox(height: 12),
+                                        const SizedBox(height: 14),
                                         _stat(
                                           'Tổng số lượng',
                                           all.fold<int>(
                                             0,
                                             (sum, p) => sum + p.soluong,
                                           ),
-                                          Icons.numbers_rounded,
-                                          const Color(0xff6572bb),
+                                          Icons.layers_rounded,
+                                          const LinearGradient(
+                                            colors: [
+                                              Color(0x44cc99ff),
+                                              Color(0x22cc99ff),
+                                            ],
+                                          ),
+                                          AppTheme.purplePrimary,
                                         ),
                                       ],
                                     ),
                             ),
                             const SizedBox(height: 28),
                             Card(
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(22),
+                                side: const BorderSide(
+                                  color: AppTheme.cardBorder,
+                                  width: 1.2,
+                                ),
+                              ),
                               child: Padding(
-                                padding: const EdgeInsets.all(18),
+                                padding: const EdgeInsets.all(20),
                                 child: Column(
                                   children: [
                                     LayoutBuilder(
                                       builder: (context, constraints) => Wrap(
-                                        spacing: 12,
-                                        runSpacing: 12,
+                                        spacing: 14,
+                                        runSpacing: 14,
                                         crossAxisAlignment:
                                             WrapCrossAlignment.center,
                                         children: [
                                           SizedBox(
                                             width: constraints.maxWidth > 600
-                                                ? 320
+                                                ? 340
                                                 : constraints.maxWidth,
                                             child: TextField(
                                               controller: _search,
@@ -433,6 +659,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     'Tìm theo tên sản phẩm…',
                                                 prefixIcon: const Icon(
                                                   Icons.search_rounded,
+                                                  size: 20,
                                                 ),
                                                 suffixIcon: _query.isNotEmpty
                                                     ? IconButton(
@@ -444,7 +671,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           );
                                                         },
                                                         icon: const Icon(
-                                                          Icons.close,
+                                                          Icons.close_rounded,
                                                           size: 18,
                                                         ),
                                                       )
@@ -453,7 +680,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             ),
                                           ),
                                           SizedBox(
-                                            width: 180,
+                                            width: 190,
                                             child:
                                                 DropdownButtonFormField<
                                                   ProductSort
@@ -464,6 +691,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       const InputDecoration(
                                                         labelText:
                                                             'Sắp xếp theo',
+                                                        prefixIcon: Icon(
+                                                          Icons.sort_rounded,
+                                                          size: 18,
+                                                        ),
                                                       ),
                                                   items: const [
                                                     DropdownMenuItem(
@@ -494,36 +725,251 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        '${filtered.length} kết quả',
-                                        style: const TextStyle(
-                                          color: Colors.blueGrey,
-                                          fontSize: 12,
+                                    Wrap(
+                                      alignment: WrapAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 10,
+                                      runSpacing: 10,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.cyanLight
+                                                .withValues(alpha: 0.25),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: AppTheme.cyanBright
+                                                  .withValues(alpha: 0.4),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${filtered.length} kết quả',
+                                            style: const TextStyle(
+                                              color: AppTheme.navy,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        Container(
+                                          padding: const EdgeInsets.all(3),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xfff1f3f9),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                              color: AppTheme.cardBorder,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              InkWell(
+                                                onTap: () => setState(
+                                                  () => _viewMode =
+                                                      ProductViewMode.list,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: _viewMode ==
+                                                            ProductViewMode.list
+                                                        ? Colors.white
+                                                        : Colors.transparent,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                      7,
+                                                    ),
+                                                    boxShadow: _viewMode ==
+                                                            ProductViewMode.list
+                                                        ? [
+                                                            BoxShadow(
+                                                              color: Colors
+                                                                  .black
+                                                                  .withValues(
+                                                                alpha: 0.08,
+                                                              ),
+                                                              blurRadius: 4,
+                                                            ),
+                                                          ]
+                                                        : null,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.view_list_rounded,
+                                                        size: 15,
+                                                        color: _viewMode ==
+                                                                ProductViewMode
+                                                                    .list
+                                                            ? AppTheme
+                                                                .purplePrimary
+                                                            : AppTheme
+                                                                .textSecondary,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        'List',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              _viewMode ==
+                                                                      ProductViewMode
+                                                                          .list
+                                                                  ? FontWeight
+                                                                      .bold
+                                                                  : FontWeight
+                                                                      .normal,
+                                                          color: _viewMode ==
+                                                                  ProductViewMode
+                                                                      .list
+                                                              ? AppTheme
+                                                                  .purpleDark
+                                                              : AppTheme
+                                                                  .textSecondary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 2),
+                                              InkWell(
+                                                onTap: () => setState(
+                                                  () => _viewMode =
+                                                      ProductViewMode.grid,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: _viewMode ==
+                                                            ProductViewMode.grid
+                                                        ? Colors.white
+                                                        : Colors.transparent,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                      7,
+                                                    ),
+                                                    boxShadow: _viewMode ==
+                                                            ProductViewMode.grid
+                                                        ? [
+                                                            BoxShadow(
+                                                              color: Colors
+                                                                  .black
+                                                                  .withValues(
+                                                                alpha: 0.08,
+                                                              ),
+                                                              blurRadius: 4,
+                                                            ),
+                                                          ]
+                                                        : null,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.grid_view_rounded,
+                                                        size: 15,
+                                                        color: _viewMode ==
+                                                                ProductViewMode
+                                                                    .grid
+                                                            ? AppTheme
+                                                                .purplePrimary
+                                                            : AppTheme
+                                                                .textSecondary,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        'Hiển thị mục',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              _viewMode ==
+                                                                      ProductViewMode
+                                                                          .grid
+                                                                  ? FontWeight
+                                                                      .bold
+                                                                  : FontWeight
+                                                                      .normal,
+                                                          color: _viewMode ==
+                                                                  ProductViewMode
+                                                                      .grid
+                                                              ? AppTheme
+                                                                  .purpleDark
+                                                              : AppTheme
+                                                                  .textSecondary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                    const SizedBox(height: 12),
                                     if (filtered.isEmpty)
                                       Padding(
                                         padding: const EdgeInsets.symmetric(
-                                          vertical: 48,
+                                          vertical: 54,
                                         ),
                                         child: Column(
                                           children: [
-                                            const Icon(
-                                              Icons.inventory_2_outlined,
-                                              size: 56,
-                                              color: Colors.blueGrey,
+                                            Container(
+                                              width: 76,
+                                              height: 76,
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [
+                                                    Color(0x3366ffff),
+                                                    Color(0x33cc99ff),
+                                                  ],
+                                                ),
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: AppTheme.purplePastel
+                                                      .withValues(alpha: 0.4),
+                                                ),
+                                              ),
+                                              child: const Icon(
+                                                Icons.inventory_2_outlined,
+                                                size: 38,
+                                                color: AppTheme.purplePrimary,
+                                              ),
                                             ),
-                                            const SizedBox(height: 16),
+                                            const SizedBox(height: 18),
                                             Text(
                                               all.isEmpty
                                                   ? 'Chưa có sản phẩm'
                                                   : 'Không tìm thấy kết quả',
                                               style: Theme.of(
                                                 context,
-                                              ).textTheme.titleMedium,
+                                              ).textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppTheme.navy,
+                                              ),
                                             ),
                                             const SizedBox(height: 8),
                                             Text(
@@ -531,8 +977,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   ? 'Bắt đầu bằng cách thêm sản phẩm đầu tiên.'
                                                   : 'Thử tìm bằng tên sản phẩm khác.',
                                               textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: AppTheme.textSecondary,
+                                              ),
                                             ),
                                           ],
+                                        ),
+                                      )
+                                    else if (_viewMode == ProductViewMode.grid)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 14),
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            final w = constraints.maxWidth;
+                                            final int crossAxisCount;
+                                            final double childAspectRatio;
+
+                                            if (w >= 1150) {
+                                              crossAxisCount = 4;
+                                              childAspectRatio = 0.73;
+                                            } else if (w >= 820) {
+                                              crossAxisCount = 3;
+                                              childAspectRatio = 0.73;
+                                            } else if (w >= 520) {
+                                              crossAxisCount = 2;
+                                              childAspectRatio = 0.73;
+                                            } else {
+                                              // Mobile app (màn hình nhỏ)
+                                              crossAxisCount = 2;
+                                              childAspectRatio = 0.61;
+                                            }
+
+                                            return GridView.builder(
+                                              shrinkWrap: true,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              itemCount: filtered.length,
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: crossAxisCount,
+                                                crossAxisSpacing: 12,
+                                                mainAxisSpacing: 12,
+                                                childAspectRatio:
+                                                    childAspectRatio,
+                                              ),
+                                              itemBuilder: (context, index) {
+                                                final item = filtered[index];
+                                                return ProductGridCard(
+                                                  product: item,
+                                                  onEdit: () => _form(item),
+                                                  onDelete: () => _delete(item),
+                                                  busy: _busyIds.contains(
+                                                    item.documentId,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
                                         ),
                                       )
                                     else if (MediaQuery.sizeOf(context).width >=
@@ -563,13 +1064,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 24),
                             const Text(
-                              'UserSpace • Flutter + Firebase + Cloudinary',
+                              'Product Manager • Flutter + Firebase + Cloudinary',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: Colors.blueGrey,
+                                color: AppTheme.textSecondary,
                                 fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],

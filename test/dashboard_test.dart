@@ -43,7 +43,7 @@ void main() {
         await tester.tap(find.byTooltip('Xóa tìm kiếm'));
         await tester.pumpAndSettle();
         expect(find.text('Bút bi'), findsOneWidget);
-        expect(find.text('12500,00 ₫'), findsOneWidget);
+        expect(find.text('12,500 ₫'), findsOneWidget);
         final delete = width >= 850
             ? find.byTooltip('Xóa Bút bi')
             : find.text('Xóa');
@@ -64,4 +64,36 @@ void main() {
       },
     );
   }
+
+  testWidgets('Dashboard toggles between List and Grid view mode', (tester) async {
+    final db = FakeFirebaseFirestore();
+    await db.collection('product').doc('a').set({
+      'name': 'Áo sơ mi',
+      'price': 250000.0,
+      'soluong': 10,
+      'image': 'https://res.cloudinary.com/test/image.jpg',
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: DashboardScreen(
+          auth: TestAuth(),
+          firestore: FirestoreService(db),
+          cloudinary: CloudinaryService(),
+          adminEmail: 'admin@example.com',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('List'), findsOneWidget);
+    expect(find.text('Hiển thị mục'), findsOneWidget);
+    await tester.tap(find.text('Hiển thị mục'));
+    await tester.pumpAndSettle();
+    expect(find.text('Áo sơ mi'), findsOneWidget);
+    expect(find.text('250,000 ₫'), findsOneWidget);
+    expect(find.text('SL: 10'), findsOneWidget);
+    await tester.tap(find.text('List'));
+    await tester.pumpAndSettle();
+    expect(find.text('Áo sơ mi'), findsOneWidget);
+  });
 }

@@ -5,7 +5,9 @@ import '../services/firestore_service.dart';
 import '../services/cloudinary_service.dart';
 import '../core/utils/validators.dart';
 import '../core/utils/app_error.dart';
+import '../core/theme/app_theme.dart';
 import '../widgets/image_picker_widget.dart';
+import '../widgets/common.dart';
 
 class ProductFormScreen extends StatefulWidget {
   const ProductFormScreen({
@@ -35,6 +37,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   bool _busy = false;
   String? _error;
   String _progress = '';
+
   @override
   void dispose() {
     _name.dispose();
@@ -87,36 +90,83 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: Scaffold(
+      backgroundColor: AppTheme.scaffoldBg,
       appBar: AppBar(
         title: Text(
           widget.product == null ? 'Thêm sản phẩm' : 'Chỉnh sửa sản phẩm',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.navy,
+            fontSize: 18,
+          ),
         ),
         automaticallyImplyLeading: !_busy,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: AppTheme.cardBorder,
+            height: 1,
+          ),
+        ),
       ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
+              constraints: const BoxConstraints(maxWidth: 680),
               child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: const BorderSide(color: AppTheme.cardBorder, width: 1.2),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(28),
                   child: Form(
                     key: _form,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Thông tin sản phẩm',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Nhập tên, giá, số lượng và chọn ảnh cho sản phẩm.',
-                          style: TextStyle(color: Colors.blueGrey, height: 1.5),
+                        Row(
+                          children: [
+                            AppIconBadge(
+                              icon: widget.product == null
+                                  ? Icons.add_box_rounded
+                                  : Icons.edit_note_rounded,
+                              size: 48,
+                              iconSize: 26,
+                              borderRadius: 14,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Thông tin sản phẩm',
+                                    style: Theme.of(context).textTheme.titleLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.navy,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Nhập tên, giá, số lượng và chọn ảnh cho sản phẩm.',
+                                    style: TextStyle(
+                                      color: AppTheme.textSecondary,
+                                      fontSize: 13,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 28),
                         ImagePickerWidget(
@@ -128,7 +178,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             _uploadedUrl = null;
                           },
                         ),
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 24),
                         TextFormField(
                           controller: _name,
                           enabled: !_busy,
@@ -138,7 +188,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             labelText: 'Tên sản phẩm',
-                            prefixIcon: Icon(Icons.inventory_2_outlined),
+                            prefixIcon: Icon(
+                              Icons.inventory_2_rounded,
+                              color: AppTheme.purplePrimary,
+                              size: 20,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -154,10 +208,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             labelText: 'Giá (VNĐ)',
                             helperText:
                                 'Giá không âm; có thể nhập phần thập phân bằng dấu chấm hoặc phẩy.',
-                            prefixIcon: Icon(Icons.payments_outlined),
+                            prefixIcon: Icon(
+                              Icons.payments_rounded,
+                              color: AppTheme.purplePrimary,
+                              size: 20,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
                         TextFormField(
                           controller: _quantity,
                           enabled: !_busy,
@@ -166,25 +224,57 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           decoration: const InputDecoration(
                             labelText: 'Số lượng',
                             helperText: 'Số nguyên không âm.',
-                            prefixIcon: Icon(Icons.numbers_rounded),
+                            prefixIcon: Icon(
+                              Icons.layers_rounded,
+                              color: AppTheme.purplePrimary,
+                              size: 20,
+                            ),
                           ),
                         ),
                         if (_error != null)
                           Padding(
-                            padding: const EdgeInsets.only(top: 18),
+                            padding: const EdgeInsets.only(top: 20),
                             child: Semantics(
                               liveRegion: true,
-                              child: Text(
-                                _error!,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.redAccent.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline_rounded,
+                                      size: 20,
+                                      color: Colors.redAccent,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        _error!,
+                                        style: const TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
+                          height: 52,
                           child: FilledButton.icon(
                             onPressed: _busy ? null : _save,
                             icon: _busy
@@ -193,18 +283,33 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                     height: 18,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
+                                      color: Colors.white,
                                     ),
                                   )
-                                : const Icon(Icons.check_rounded),
-                            label: Text(_busy ? _progress : 'Lưu sản phẩm'),
+                                : const Icon(Icons.check_rounded, size: 20),
+                            label: Text(
+                              _busy ? _progress : 'Lưu sản phẩm',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Center(
                           child: TextButton(
                             onPressed: _busy
                                 ? null
                                 : () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppTheme.textSecondary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                            ),
                             child: const Text('Hủy bỏ'),
                           ),
                         ),
